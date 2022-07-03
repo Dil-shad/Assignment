@@ -17,8 +17,10 @@
 -"python manage.py runserver"
 
 Create a new user or use existing user
-- Created superuser: Username -- user1
+- Created user: Username -- user1
                     Password: user123
+-superuser:admin
+    pasword:admin
 
 - **Thanks For Reading **
 - **Regards** Dilshad
