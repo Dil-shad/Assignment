@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container">
+    {% for message in messages %}
+    <h5>
+        <div class="container">
+            <div class="alert alert-danger mt-5">
+                {{ message }}
+            </div>
+        </div>
+    </h5>
+    {% endfor %}
+    <div class="row mt-5">
+        <div class="col-4"></div>
+        <div class="col-4 bg-light p-3 border-white border-5">
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <label for="" class="float-start">User Name:</label>
+                <input name="uname" type="text" class="float-end form-control">
+                <label for="" class="float-start">Password:</label>
+                <input name="pswd" type="password" class="float-end form-control">
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success w-25 my-3">LOGIN</button>
+                </div>
+            </form>
+
+        </div>
+        <div class="col-4"></div>
+    </div>
+</div>
+
+{% endblock body %}

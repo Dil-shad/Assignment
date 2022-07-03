@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<div class="container-fluid mx-3" style="min-height: 150vh;">
+    <div class="row mt-4 h-100">
+        <div class="col-md-3 ">
+            <div class="my-5">
+                <h4>INPUTS</h4>
+                <form id="main_form" action="" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="teacherid" id="teacherid" />
+                    <input id="first_name" value="" type="text" placeholder="First Name" class="form-control my-2 w-100"
+                        required>
+                    <input id="last_name" value="" type="text" placeholder="Last Name" class="form-control my-2 w-100">
+                    <input id="email" value="" type="text" placeholder="email@mail.com" class="form-control my-2 w-100">
+                    <input id="phone_number" value="" type="text" placeholder="Phone Number"
+                        class="form-control my-2 w-100">
+                    <input id="room_number" value="" type="text" placeholder="Room Number"
+                        class="form-control my-2 w-100">
+                    <input id="subjects_taught" value="" type="text" placeholder="Subjects Taught"
+                        class="form-control my-2 w-100" onfocus="this.value=''">
+                    <input id="file" value="" type="file" placeholder="" class="form-control my-2 w-100">
+                    <div class="text-center">
+                        <button id="btn_main" type="button" class="btn btn-info w-50 fw-bold">ADD/EDIT</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <div class="col-md-9 ">
+            <div>
+                <form action="" method="post">
+                    {% csrf_token %}
+
+                    <input id="q" name="q" type="text" class="" placeholder="Filter by last-name">
+                    <button id="filt_btn" class="" type="button">Filter</button>
+                </form>
+            </div>
+            <div id="main" class="row">
+
+                {% for i in obj %}
+                <div class="col-3 my-3 ">
+
+                    <div class="card">
+                        <div class="card-img">
+                            <a href="#" data-sid="{{i.id}}" onclick="moda(this)">
+                                {% if i.image == '' %}
+                                <img class="w-100" src="/static/image/default.png" alt="dcsf">
+                                {% else %}
+                                <img class="w-100" src="/media/{{ i.image }}" alt="dff">
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="card-info">
+                            <p class="text-title">{{i.first_name}} {{i.last_name}} </p>
+                            <p class="text-body">{{i.email}}</p>
+                        </div>
+
+                        <div class="card-footer">
+
+                            <div class="row ">
+                                <div class="col-6">
+                                    <button class="btn btn-info btn-sm  float-end" data-sid="{{i.id}}"
+                                        onclick="edit(this)"> Edit</button>
+                                </div>
+                                <div class="col-6"><button class="btn btn-danger btn-sm  float-end" data-sid="{{i.id}}"
+                                        onclick="moda(this)"> View</button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                </div>
+
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<div class="modal fade" id="MyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">View</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="stock_category_form" action="#" method="post">
+                <div class="modal-body p-1">
+                    <div class="conatiner p-5">
+                        <div class="row">
+
+                            <div class="col-12 ">
+                                <div class="text-center bg-light">
+                                    <div class="text-center mb-3">
+                                        <img id="ig" class="rounded-circle w-75" alt="img" src="">
+
+                                    </div>
+
+                                    <p id="f_name"></p>
+                                    <p id="l_name"></p>
+                                    <p id="e_mail"></p>
+                                    <p id="p_number"></p>
+                                    <p id="r_number"></p>
+                                    <p id="sub"></p>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function edit(id) {
+        var idd = id.getAttribute("data-sid")
+        console.log(idd)
+        var data = new FormData();
+        data.append("pid", idd)
+        mydata = { pid: idd }
+        $.ajax({
+            method: "POST",
+            url: "{% url 'edit' %}",
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            data: data,
+            dataType: "json",
+            success: function (data) {
+                console.log(data)
+                a = data.r_data
+                console.log(a.teacherid)
+                $('#teacherid').val(a.teacherid)
+                $('#first_name').val(a.first_name)
+                $('#last_name').val(a.last_name)
+                $('#email').val(a.email)
+                $('#phone_number').val(a.phone_number)
+                $('#room_number').val(a.room_number)
+                $('#subjects_taught').val(a.subjects)
+
+
+            }
+        })
+
+    }
+
+
+    //filter
+    $('#filt_btn').click(function () {
+        output = ""
+        console.log('clicked filter')
+        var q = $('#q').val()
+        var data = new FormData();
+        data.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+        data.append("q", q)
+        console.log(q)
+
+        $.ajax({
+            method: "POST",
+            url: "{% url 'filter_teacher' %}",
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            data: data,
+            dataType: "json",
+            success: function (res) {
+                console.log(res)
+                var a = res.r_data
+                console.log(a.length)
+                if (res.status == 1) {
+                    console.log('rettun success')
+                    for (i = 0; i < a.length; i++) {
+                        console.log(a[i].last_name)
+                        output += `
+                        <div class="col-3 my-3 ">
+               
+                            <div class="card">
+                                <div class="card-img">
+                                    <a href="#" data-sid="${a[i].id}" onclick="moda(this)">
+                                    
+                                    <img class="w-100"   src="/media/${a[i].image}" alt="${a[i].image}">
+        
+                                    
+                                </a>
+        
+                                </div>
+                                <div class="card-info">
+                                    <p class="text-title">${a[i].first_name}</p>
+                                    <p class="text-body">${a[i].email}
+                                        
+                                        
+                                    </p>
+                                    
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row ">
+                                        <div class="col-6"><button class="btn btn-info btn-sm  float-end" data-sid="${a[i].id}"
+                                            onclick="edit(this)"> Edit</button></div>
+                                        <div class="col-6"><button id="btn_view" type="button"
+                                                class="btn btn-danger btn-sm  float-end" data-sid="${a[i].id}" onclick="moda(this)">View</button></div>
+                                    </div>
+        
+        
+                                </div>
+                            </div>
+                       
+                    </div>
+                            `;
+                        $('#main').html(output)
+                    }
+
+                }
+
+
+            }
+        })
+    })
+    $('#btn_main').click(function () {
+        console.log('clicked')
+        var data = new FormData();
+
+        output = "";
+
+        data.append("file", $("#file")[0].files[0]);
+        data.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+        data.append("teacherid", $('#teacherid').val())
+        data.append("first_name", $('#first_name').val())
+        data.append("last_name", $('#last_name').val())
+        data.append("email", $('#email').val())
+        data.append("phone_number", $('#phone_number').val())
+        data.append("room_number", $('#room_number').val())
+        data.append("subjects_taught", $('#subjects_taught').val())
+        console.log(data.values)
+        $.ajax({
+            method: "POST",
+            url: "{% url 'add_teacher' %}",
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            data: data,
+            dataType: "json",
+            success: function (res) {
+                console.log(res)
+                var val = res.r_data
+                if (res.status == 1) {
+                    console.log('card_view requested')
+                    $('#teacherid').val('')
+                    document.getElementById("main_form").reset();
+                    card_view(val)
+
+                }
+
+            }
+        })
+    })
+    function card_view(arg) {
+        console.log('called')
+        console.log(arg)
+        a = arg
+        for (i = 0; i < a.length; i++) {
+            output += `<div class="col-3 my-3 ">
+               
+                    <div class="card">
+                        <div class="card-img">
+                            <a href="#" data-sid="${a[i].id}" onclick="moda(this)">
+                            
+                            <img class="w-100"   src="/media/${a[i].image}" alt="${a[i].image}">       
+                        </a>
+
+                        </div>
+                        <div class="card-info">
+                            <p class="text-title">${a[i].first_name}</p>
+                            <p class="text-body">${a[i].email}     
+                            </p>
+                            
+                        </div>
+                        <div class="card-footer">
+                            <div class="row ">
+                                <div class="col-6"><button class="btn btn-info btn-sm  float-end" data-sid="${a[i].id}"
+                                    onclick="edit(this)"> Edit</button></div>
+                                <div class="col-6"><button id="btn_view" type="button"
+                                        class="btn btn-danger btn-sm  float-end" data-sid="${a[i].id}" onclick="moda(this)">View</button></div>
+                            </div>
+
+
+                        </div>
+                    </div>
+               
+            </div>`;
+            $('#main').html(output)
+
+
+        }
+    }
+    $('#btn_view').click(function () {
+        var n = this.getAttribute("data-sid")
+        console.log(n)
+
+
+
+    })
+
+    function moda(id) {
+        let idd = id.getAttribute("data-sid")
+        console.log(idd)
+        console.log('HIII')
+        var data = new FormData();
+        data.append("pid", idd)
+        mydata = { pid: idd }
+        $.ajax({
+            method: "POST",
+            url: "{% url 'view_teacher' %}",
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            data: data,
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+
+                //$("#Tname").html(data.first_name);
+                $('#f_name').html(data.first_name)
+                $('#l_name').html(data.last_name)
+                $('#e_mail').html(data.email)
+                $('#p_number').html(data.phone_number)
+                $('#r_number').html(data.room_number)
+                //
+                a = data.subjects.toString();
+                $('#sub').html(a)
+                console.log(a)
+                for (i = 0; i < a.length; i++) {
+                    //console.log(a[i])
+
+                }
+                //$("#Tmob").html(data.subjects);
+                path = data.image
+                ln = path.length
+                console.log(path)
+                if (path == '/media/') {
+                    def_path = "/static/image/default.png"
+                    $('#ig').attr('src', def_path)
+
+                }
+                else {
+                    $('#ig').attr('src', path)
+                }
+                $('#MyModal').modal('show')
+
+
+            }
+        })
+
+
+    }
+</script>
+<style>
+    /* From uiverse.io by @alexruix */
+    .card {
+        width: 190px;
+        height: 320px;
+        padding: .8em;
+        background: #f5f5f5;
+        position: relative;
+        overflow: visible;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    }
+
+    .card-img {
+        background-color: #ffcaa6;
+        height: 40%;
+        width: 100%;
+        border-radius: .5rem;
+        transition: .3s ease;
+    }
+
+    .card-info {
+        padding-top: 10%;
+    }
+
+    svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .card-footer {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+    }
+
+    /*Text*/
+    .text-title {
+        font-weight: 900;
+        font-size: 0.9em;
+        line-height: 1.5;
+    }
+
+    .text-body {
+        font-size: .9em;
+        padding-bottom: 10px;
+    }
+
+    /*Button*/
+    .card-button {
+        border: 1px solid #252525;
+        display: flex;
+        padding: .3em;
+        cursor: pointer;
+        border-radius: 50px;
+        transition: .3s ease-in-out;
+    }
+
+    /*Hover*/
+    .card-img:hover {
+        transform: translateY(-25%);
+        box-shadow: rgba(226, 196, 63, 0.25) 0px 13px 47px -5px, rgba(180, 71, 71, 0.3) 0px 8px 16px -8px;
+    }
+
+    .card-button:hover {
+        border: 1px solid #ffcaa6;
+        background-color: #ffcaa6;
+    }
+</style>
+{% endblock body %}
